@@ -14,8 +14,11 @@ import com.transaction_service.model.Transaction;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.userId = :userId")
-    BigDecimal getTotalAmount(@Param("userId") Long userId);
+    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.userId = :userId AND t.category = :category")
+    BigDecimal getTotalAmountByCategory(@Param("userId") Long userId, @Param("category") String category);
+
+    @Query("SELECT t FROM Transaction t WHERE t.userId = :userId AND t.category = :category ORDER BY t.date DESC")
+    List<Transaction> findAllByUserIdAndCategory(@Param("userId") Long userId, @Param("category") String category);
 
     Optional<Transaction> findByIdAndUserId(Long id, Long userId);
 

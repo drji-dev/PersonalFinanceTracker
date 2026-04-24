@@ -33,9 +33,22 @@ public class TransactionController {
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/totalamount")
-    public ResponseEntity<BigDecimal> getTotalAmount(@RequestHeader Long userId) {
-        return ResponseEntity.ok(transactionService.totalAmount(userId));
+    @GetMapping("/category")
+    public ResponseEntity<TransactionResponse> getAllTransactionByCategory(
+            @RequestParam(required = false) String category,
+            @RequestHeader("User-Id") Long userId) {
+
+        List<Transaction> transactions = transactionService.getAllTransactionsByCategory(userId, category);
+        if (transactions != null) {
+            return ResponseEntity.ok(convertToResponse(transactions));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/category/stats")
+    public ResponseEntity<BigDecimal> getTotalAmountByCategory(@RequestParam(required = false) String category,
+            @RequestHeader("User-Id") Long userId) {
+        return ResponseEntity.ok(transactionService.totalAmountByCategory(userId, category));
     }
 
     @PostMapping
@@ -56,10 +69,17 @@ public class TransactionController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTransaction(@PathVariable Long id, @RequestHeader("User-Id") Long userId) {
+        transactionService.deleteTransaction(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
     private TransactionResponse convertToResponse(List<Transaction> transaction) {
 
         BigDecimal total = transaction.stream()
                 .map(t -> t.getAmount())
+                .filter(amount -> amount != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         TransactionResponse response = TransactionResponse.builder()

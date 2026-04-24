@@ -24,8 +24,12 @@ public class TransactionService {
         return transactionRepository.findAllByUserId(userId);
     }
 
-    public BigDecimal totalAmount(Long userId) {
-        return transactionRepository.getTotalAmount(userId);
+    public List<Transaction> getAllTransactionsByCategory(Long userId, String category) {
+        return transactionRepository.findAllByUserIdAndCategory(userId, category);
+    }
+
+    public BigDecimal totalAmountByCategory(Long userId, String category) {
+        return transactionRepository.getTotalAmountByCategory(userId, category);
     }
 
     public void createTransaction(TransactionRequest request, Long userId) {
@@ -34,6 +38,7 @@ public class TransactionService {
                 .amount(request.getAmount())
                 .description(request.getDescription())
                 .date(LocalDateTime.now())
+                .userId(userId)
                 .build();
         transactionRepository.save(transaction);
     }
@@ -46,5 +51,9 @@ public class TransactionService {
         transaction.setCategory(request.getCategory());
         transaction.setDescription(request.getDescription());
         transactionRepository.save(transaction);
+    }
+
+    public void deleteTransaction(Long id, Long userId) {
+        transactionRepository.deleteByIdAndUserId(id, userId);
     }
 }
