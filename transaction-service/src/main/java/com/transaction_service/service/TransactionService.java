@@ -29,7 +29,10 @@ public class TransactionService {
     }
 
     public BigDecimal totalAmountByCategory(Long userId, String category) {
-        return transactionRepository.getTotalAmountByCategory(userId, category);
+
+        BigDecimal total = transactionRepository.getTotalAmountByCategory(userId, category);
+        
+        return total != null ? total : BigDecimal.ZERO;
     }
 
     public void createTransaction(TransactionRequest request, Long userId) {
@@ -47,9 +50,13 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new RuntimeException("Not found"));
 
-        transaction.setAmount(request.getAmount());
-        transaction.setCategory(request.getCategory());
-        transaction.setDescription(request.getDescription());
+        if (request.getAmount() != null)
+            transaction.setAmount(request.getAmount());
+        if (request.getCategory() != null)
+            transaction.setCategory(request.getCategory());
+        if (request.getDescription() != null)
+            transaction.setDescription(request.getDescription());
+
         transactionRepository.save(transaction);
     }
 
