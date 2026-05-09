@@ -21,7 +21,8 @@ spring:
   
 eureka:
   client:
-    enabled: false
+    service-url:
+      defaultZone: ${LOCAL_EURECA_URL}
 
 
 server:

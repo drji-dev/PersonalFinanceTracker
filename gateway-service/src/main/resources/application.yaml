@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: gateway-service
+
+    cloud:
+      gateway:
+        routes:
+          id: transaction-service
+          uri: lb://transaction-service # lb означает Load Balancer (ищет через Eureka)
+          predicates:
+            - Path=/api/transaction/**
