@@ -22,7 +22,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: ${LOCAL_EURECA_URL}
+      defaultZone: ${LOCAL_EUREkA_URL}
 
 server:
   port: 8081

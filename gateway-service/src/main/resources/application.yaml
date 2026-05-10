@@ -3,9 +3,12 @@ spring:
     name: gateway-service
   config:
     import: optional:file:.env[.properties]
-  
+    
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
       server:
         webmvc:
           routes:
@@ -13,11 +16,10 @@ spring:
               uri: lb://transaction-service
               predicates:
                 - Path=/api/transaction/**
-
 eureka:
   client:
     service-url:
-      defaultZone: ${LOCAL_EURECA_URL}
+      defaultZone: ${LOCAL_EUREKA_URL}
     fetch-registry: true
     register-with-eureka: true
 
