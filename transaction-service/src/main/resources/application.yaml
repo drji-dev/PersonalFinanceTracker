@@ -24,6 +24,5 @@ eureka:
     service-url:
       defaultZone: ${LOCAL_EURECA_URL}
 
-
 server:
-  port: 8080
+  port: 8081

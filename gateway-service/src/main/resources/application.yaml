@@ -1,11 +1,25 @@
 spring:
   application:
     name: gateway-service
+  config:
+    import: optional:file:.env[.properties]
+  
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: transaction-service
+              uri: lb://transaction-service
+              predicates:
+                - Path=/api/transaction/**
 
-    cloud:
-      gateway:
-        routes:
-          id: transaction-service
-          uri: lb://transaction-service # lb означает Load Balancer (ищет через Eureka)
-          predicates:
-            - Path=/api/transaction/**
+eureka:
+  client:
+    service-url:
+      defaultZone: ${LOCAL_EURECA_URL}
+    fetch-registry: true
+    register-with-eureka: true
+
+server:
+  port: 8080

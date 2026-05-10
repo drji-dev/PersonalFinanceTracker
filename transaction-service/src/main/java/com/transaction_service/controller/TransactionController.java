@@ -26,6 +26,10 @@ public class TransactionController {
 
     @GetMapping
     public ResponseEntity<TransactionResponse> getAllTransactions(@RequestHeader("User-Id") Long userId) {
+
+        if (userId == null)
+            userId = 1L;
+
         List<Transaction> transactions = transactionService.getAllTransactions(userId);
         if (transactions != null) {
             return ResponseEntity.ok(convertToResponse(transactions));
