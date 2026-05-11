@@ -38,7 +38,7 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${DOCKER_EUREKA_URL}
     depends_on:
       eureka-server:
         condition: service_healthy 
@@ -51,8 +51,10 @@ services:
       - "8081:8081"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL}
+      SPRING_DATASOURCE_USERNAME: ${DOCKER_DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DOCKER_DB_PASSWORD}
       SPRING_DATASOURCE_URL: ${DOCKER_DB_URL}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${DOCKER_EUREKA_URL}
     depends_on:
       postgres:
         condition: service_healthy
