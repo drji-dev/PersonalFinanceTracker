@@ -21,7 +21,7 @@ public class JwtUtil {
     @Value("${spring.jwt.secret}")
     private String secret;
 
-    @Value("${spring.jwt.life_time}")
+    @Value("${spring.jwt.lifetime}")
     private int lifeTime;
 
     private SecretKey getSigningKey() {
@@ -32,6 +32,7 @@ public class JwtUtil {
         UserDetailsImpl userDetails = (UserDetailsImpl) authenticator.getPrincipal();
         return Jwts.builder()
                 .subject(userDetails.getUsername())
+                .claim("userId", userDetails.getId())
                 .issuedAt(new Date())
                 .expiration(new Date((new Date()).getTime() + lifeTime))
                 .signWith(getSigningKey())

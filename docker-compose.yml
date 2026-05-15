@@ -1,17 +1,35 @@
 services:
-  postgres:
+  transaction-postgres:
     image: postgres:15
-    container_name: postgres
+    container_name: transaction-postgres
     environment:
-      POSTGRES_DB: ${DOCKER_DB_NAME}
-      POSTGRES_USER: ${DOCKER_DB_USERNAME}
-      POSTGRES_PASSWORD: ${DOCKER_DB_PASSWORD}
+      POSTGRES_DB: ${DOCKER_TRANSACTION_DB_NAME}
+      POSTGRES_USER: ${DOCKER_TRANSACTION_DB_USERNAME}
+      POSTGRES_PASSWORD: ${DOCKER_TRANSACTION_DB_PASSWORD}
     ports:
       - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - transaction_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DOCKER_DB_USERNAME} -d ${DOCKER_DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DOCKER_TRANSACTION_DB_USERNAME} -d ${DOCKER_TRANSACTION_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  auth-postgres:
+    image: postgres:15
+    container_name: auth-postgres
+    environment:
+      POSTGRES_DB: ${DOCKER_AUTH_DB_NAME}
+      POSTGRES_USER: ${DOCKER_AUTH_DB_USERNAME}
+      POSTGRES_PASSWORD: ${DOCKER_AUTH_DB_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DOCKER_AUTH_DB_USERNAME} -d ${DOCKER_AUTH_DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,10 +43,11 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
-      interval: 10s
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/ || exit 1"]
+      interval: 30s
       timeout: 5s
-      retries: 10
+      retries: 3
+      start_period: 20s  
     restart: on-failure
   
   gateway-server:
@@ -41,7 +60,7 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${DOCKER_EUREKA_URL}
     depends_on:
       eureka-server:
-        condition: service_healthy 
+        condition: service_healthy
     restart: on-failure
   
   transaction-server:
@@ -51,14 +70,38 @@ services:
       - "8081:8081"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_USERNAME: ${DOCKER_DB_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${DOCKER_DB_PASSWORD}
-      SPRING_DATASOURCE_URL: ${DOCKER_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${DOCKER_TRANSACTION_DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DOCKER_TRANSACTION_DB_PASSWORD}
+      SPRING_DATASOURCE_URL: ${DOCKER_TRANSACTION_DB_URL}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_SECRET_KEY: ${DOCKER_JWT_SECRET}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${DOCKER_EUREKA_URL}
     depends_on:
-      postgres:
+      eureka-server:
+        condition: service_healthy
+      transaction-postgres:
         condition: service_healthy
     restart: on-failure
 
+  auth-server:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_USERNAME: ${DOCKER_AUTH_DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DOCKER_AUTH_DB_PASSWORD}
+      SPRING_DATASOURCE_URL: ${DOCKER_AUTH_DB_URL}
+      SPRING_JWT_SECRET: ${DOCKER_JWT_SECRET}
+      SPRING_JWT_LIFETIME: ${DOCKER_JWT_LIFETIME}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${DOCKER_EUREKA_URL}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      auth-postgres:
+        condition: service_healthy
+    restart: on-failure    
+
 volumes:
-  postgres_data:
+  auth_postgres_data:
+  transaction_postgres_data:

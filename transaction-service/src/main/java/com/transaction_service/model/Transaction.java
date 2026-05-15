@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class Transaction {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @NotNull
     private BigDecimal amount;
 
     private String category;

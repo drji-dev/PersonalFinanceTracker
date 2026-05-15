@@ -10,7 +10,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jwt:
     secret: ${JWT_SECRET}
-    life_time: ${JWT_LIFE_TIME}
+    lifetime: ${JWT_LIFE_TIME}
 
   jpa:
     hibernate:

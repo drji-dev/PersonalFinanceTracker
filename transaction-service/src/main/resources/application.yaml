@@ -19,6 +19,13 @@ spring:
         format_sql: true
         default_schema: public
   
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jws-algorithms: HS256
+          secret-key: ${SECRET_KEY}
+
 eureka:
   client:
     service-url:
