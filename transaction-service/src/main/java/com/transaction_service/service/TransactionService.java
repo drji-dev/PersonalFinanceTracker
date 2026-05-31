@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.transaction_service.dto.request.TransactionRequest;
@@ -20,6 +21,8 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
 
+    private final KafkaTemplate<String, String> kafkaTemplate;
+
     public List<Transaction> getAllTransactions(Long userId) {
         return transactionRepository.findAllByUserId(userId);
     }
@@ -31,7 +34,7 @@ public class TransactionService {
     public BigDecimal totalAmountByCategory(Long userId, String category) {
 
         BigDecimal total = transactionRepository.getTotalAmountByCategory(userId, category);
-        
+
         return total != null ? total : BigDecimal.ZERO;
     }
 
@@ -62,5 +65,11 @@ public class TransactionService {
 
     public void deleteTransaction(Long id, Long userId) {
         transactionRepository.deleteByIdAndUserId(id, userId);
+    }
+
+    // Create topic in kafka
+    private void sendMessage(String message) {
+        kafkaTemplate.send("transaction_topic", message);
+        System.out.println("Сообщение отправлено в Kafka: " + message);
     }
 }
